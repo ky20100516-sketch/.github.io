@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>タイムアタック・キャッチボール</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            color: #333;
+            user-select: none;
+            -webkit-user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 500px) {
+            #app-container {
+                min-height: 85vh;
+                border-radius: 20px;
+                overflow: hidden;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        .title {
+            font-size: 1.8rem;
+            color: #ff4757;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #747d8c;
+            margin-bottom: 40px;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 18px 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 6px 0 #ff1e33;
+            transition: all 0.1s ease;
+            margin-bottom: 15px;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #ff1e33;
+        }
+
+        /* Quiz Screen */
+        .top-bar {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .q-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #57606f;
+            margin-bottom: 10px;
+        }
+
+        .timer-bg {
+            width: 100%;
+            height: 16px;
+            background-color: #f1f2f6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background-color: #2ed573;
+            border-radius: 10px;
+            transition: width 0.05s linear;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            text-align: left;
+            width: 100%;
+        }
+
+        .choices-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background-color: #1e90ff;
+            box-shadow: 0 6px 0 #0073e6;
+            max-width: 100%;
+            font-size: 1.1rem;
+            padding: 20px;
+        }
+        .choice-btn:active {
+            box-shadow: 0 0 0 #0073e6;
+            transform: translateY(6px);
+        }
+
+        /* Modal / Popup */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 360px;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .explanation {
+            background-color: #f1f2f6;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            line-height: 1.6;
+            text-align: left;
+            color: #2f3542;
+            margin-bottom: 25px;
+        }
+
+        .next-btn {
+            background-color: #ffa502;
+            box-shadow: 0 6px 0 #e58e26;
+            margin-bottom: 0;
+        }
+        .next-btn:active {
+            box-shadow: 0 0 0 #e58e26;
+        }
+
+        /* Result Screen */
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background-color: #ff4757;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        .score-num {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .score-total {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .message {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2f3542;
+            margin-bottom: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- スタート画面 -->
+        <div id="start-screen" class="screen active">
+            <div style="font-size: 4rem; margin-bottom: 10px;">⚾</div>
+            <h1 class="title">タイムアタック<br>キャッチボール</h1>
+            <p class="subtitle">英語の基礎固め！1問5秒で即答しよう！</p>
+            <button class="btn" onclick="startGame()">▶️ ゲームスタート</button>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="screen">
+            <div class="top-bar">
+                <div class="q-info">
+                    <span id="q-number">Q1 / 10</span>
+                    <span>🕒 5.0s</span>
+                </div>
+                <div class="timer-bg">
+                    <div id="timer-fill" class="timer-fill"></div>
+                </div>
+            </div>
+            
+            <div id="question-text" class="question-text">
+                Question Text
+            </div>
+            
+            <div id="choices-container" class="choices-container">
+                <!-- 選択肢がここに生成される -->
+            </div>
+        </div>
+
+        <!-- ポップアップ (正誤判定と解説) -->
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal-content">
+                <div id="result-title" class="result-title">⭕ 正解！</div>
+                <div id="explanation" class="explanation">
+                    ここに解説が入ります。
+                </div>
+                <button class="btn next-btn" onclick="nextQuestion()">⏭️ 次へ進む</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <h2 class="title" style="margin-bottom: 30px; color: #2f3542;">最終スコア</h2>
+            <div class="score-circle">
+                <div id="score-num" class="score-num">0</div>
+                <div id="score-total" class="score-total">/ 10</div>
+            </div>
+            <div id="result-message" class="message">メッセージ</div>
+            <button class="btn" onclick="startGame()">🔄 もう一度挑戦する</button>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                q: "Are you helping your father?（あなたはお父さんを手伝っていますか）",
+                choices: ["Yes, you are.", "Yes, I am.", "Yes, I do."],
+                answer: "Yes, I am.",
+                exp: "「あなたは？」と聞かれたら「私は」で返します。Areで聞かれたらbe動詞（I am）で即答！"
+            },
+            {
+                q: "Can Mary speak French?（メアリーはフランス語を話せますか）",
+                choices: ["No, she doesn't.", "No, she isn't.", "No, she can't."],
+                answer: "No, she can't.",
+                exp: "Canで聞かれたら必ず can（can't）のボールで打ち返します！"
+            },
+            {
+                q: "Who is making lunch? ―― Yuki and Kenta (  ).（誰が昼食を作っていますか）",
+                choices: ["are", "do", "is"],
+                answer: "are",
+                exp: "Who is〜? とbe動詞で聞かれたらbe動詞で返します。ユキとケンタは「2人」なので are が正解！"
+            },
+            {
+                q: "Do they play basketball?（彼らはバスケをしますか）",
+                choices: ["Yes, they are.", "Yes, they do.", "Yes, they play."],
+                answer: "Yes, they do.",
+                exp: "Do で投げられたボールは、必ず do で打ち返します！"
+            },
+            {
+                q: "Is your mother washing dishes?（お母さんはお皿を洗っていますか）",
+                choices: ["Yes, I am.", "Yes, he does.", "Yes, she is."],
+                answer: "Yes, she is.",
+                exp: "お母さん（女性1人）なので she で受けます。Isで聞かれているので is で返します。"
+            },
+            {
+                q: "What are those? ―― (  ) are apples.（あれらは何ですか）",
+                choices: ["Those", "They", "It"],
+                answer: "They",
+                exp: "These/Those で聞かれたら、モノであっても必ず They（それら） に持ち替えて答えるのが鉄則！"
+            },
+            {
+                q: "Does Ken watch TV?（ケンはテレビを見ますか）",
+                choices: ["Yes, he is.", "Yes, he watches.", "Yes, he does."],
+                answer: "Yes, he does.",
+                exp: "Does で投げられたボールは、必ず does で打ち返します！"
+            },
+            {
+                q: "Are they swimming now?（彼らは今泳いでいますか）",
+                choices: ["Yes, they do.", "Yes, they swim.", "Yes, they are."],
+                answer: "Yes, they are.",
+                exp: "Areで聞かれているので、つられてdoを選ばないように注意！そのまま are で返します。"
+            },
+            {
+                q: "Is this your school?（これはあなたの学校ですか）",
+                choices: ["Yes, this is.", "Yes, it is.", "Yes, I am."],
+                answer: "Yes, it is.",
+                exp: "This（これ）/ That（あれ）で聞かれたら、必ず It（それ）に持ち替えて答えます！"
+            },
+            {
+                q: "Can you run fast?（あなたは速く走れますか）",
+                choices: ["Yes, you can.", "Yes, I do.", "Yes, I can."],
+                answer: "Yes, I can.",
+                exp: "「あなたは？」➔「私は（I）」。そして Can で聞かれたら can で打ち返すコンボです！"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 0;
+        let timerInterval;
+        const TIME_LIMIT = 5000; // 5秒 (ミリ秒)
+        const UPDATE_FREQ = 50;  // 50ミリ秒ごとに更新
+
+        const elements = {
+            startScreen: document.getElementById('start-screen'),
+            quizScreen: document.getElementById('quiz-screen'),
+            resultScreen: document.getElementById('result-screen'),
+            modalOverlay: document.getElementById('modal-overlay'),
+            qNumber: document.getElementById('q-number'),
+            timerFill: document.getElementById('timer-fill'),
+            questionText: document.getElementById('question-text'),
+            choicesContainer: document.getElementById('choices-container'),
+            resultTitle: document.getElementById('result-title'),
+            explanation: document.getElementById('explanation'),
+            scoreNum: document.getElementById('score-num'),
+            scoreTotal: document.getElementById('score-total'),
+            resultMessage: document.getElementById('result-message')
+        };
+
+        function switchScreen(screenElement) {
+            elements.startScreen.classList.remove('active');
+            elements.quizScreen.classList.remove('active');
+            elements.resultScreen.classList.remove('active');
+            screenElement.classList.add('active');
+        }
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            switchScreen(elements.quizScreen);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentQ = quizData[currentQuestionIndex];
+            elements.qNumber.textContent = `Q${currentQuestionIndex + 1} / ${quizData.length}`;
+            elements.questionText.textContent = currentQ.q;
+            
+            // 選択肢の生成
+            elements.choicesContainer.innerHTML = '';
+            currentQ.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'btn choice-btn';
+                button.textContent = choice;
+                button.onclick = () => handleAnswer(choice);
+                elements.choicesContainer.appendChild(button);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = TIME_LIMIT;
+            updateTimerUI();
+            clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft -= UPDATE_FREQ;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    clearInterval(timerInterval);
+                    handleAnswer(null); // 時間切れ
+                }
+                updateTimerUI();
+            }, UPDATE_FREQ);
+        }
+
+        function updateTimerUI() {
+            const percentage = (timeLeft / TIME_LIMIT) * 100;
+            elements.timerFill.style.width = `${percentage}%`;
+
+            // 色の変化（残り時間に応じて）
+            if (percentage > 50) {
+                elements.timerFill.style.backgroundColor = '#2ed573'; // 緑
+            } else if (percentage > 25) {
+                elements.timerFill.style.backgroundColor = '#ffa502'; // オレンジ
+            } else {
+                elements.timerFill.style.backgroundColor = '#ff4757'; // 赤
+            }
+        }
+
+        function handleAnswer(selectedChoice) {
+            clearInterval(timerInterval); // タイマー停止
+            const currentQ = quizData[currentQuestionIndex];
+            
+            if (selectedChoice === currentQ.answer) {
+                elements.resultTitle.textContent = '⭕ 正解！';
+                elements.resultTitle.style.color = '#2ed573';
+                score++;
+            } else if (selectedChoice === null) {
+                elements.resultTitle.textContent = '⏰ タイムアップ';
+                elements.resultTitle.style.color = '#ff4757';
+            } else {
+                elements.resultTitle.textContent = '❌ 不正解...';
+                elements.resultTitle.style.color = '#ff4757';
+            }
+
+            elements.explanation.innerHTML = `<strong style="color:#ff4757;">正解: ${currentQ.answer}</strong><br><br>${currentQ.exp}`;
+            elements.modalOverlay.classList.add('active');
+        }
+
+        function nextQuestion() {
+            elements.modalOverlay.classList.remove('active');
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            switchScreen(elements.resultScreen);
+            elements.scoreNum.textContent = score;
+            elements.scoreTotal.textContent = `/ ${quizData.length}`;
+            
+            if (score === quizData.length) {
+                elements.resultMessage.textContent = '🎉 パーフェクト！完全マスター！';
+            } else if (score >= 7) {
+                elements.resultMessage.textContent = '✨ すばらしい！基礎が固まってきたね！';
+            } else {
+                elements.resultMessage.textContent = '💪 解説を読んでリベンジしよう！';
+            }
+        }
+    </script>
+</body>
+</html>
