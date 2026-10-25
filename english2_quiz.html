@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>中1英語 総復習クイズ</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --primary-dark: #00a8cc;
+      --secondary: #ff5e7e;
+      --secondary-dark: #cc4b65;
+      --accent: #ffdd40;
+      --bg: #f0f8ff;
+      --text: #333333;
+      --white: #ffffff;
+      --gray: #888888;
+      --light-gray: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #app {
+      background: var(--white);
+      width: 100%;
+      max-width: 500px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+
+    @media (min-width: 500px) {
+      #app {
+        min-height: 90vh;
+        border-radius: 20px;
+        margin: 20px;
+      }
+    }
+
+    header {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 20px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0, 210, 255, 0.2);
+    }
+
+    .container {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    #progress {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--primary-dark);
+      font-weight: 700;
+      background: #e6f9ff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      margin: 0 auto 20px auto;
+      display: inline-block;
+    }
+
+    .revenge-badge {
+      background-color: var(--secondary);
+      color: var(--white);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    #question-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 30px;
+      text-align: center;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #question-text small {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    #choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .choice-btn {
+      background-color: var(--white);
+      color: var(--text);
+      border: 3px solid var(--primary);
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 0 6px 0 var(--primary);
+      position: relative;
+    }
+
+    .choice-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 0 0 var(--primary);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: var(--white);
+      width: 90%;
+      max-width: 400px;
+      border-radius: 24px;
+      padding: 30px 20px;
+      text-align: center;
+      transform: translateY(50px) scale(0.9);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0) scale(1);
+    }
+
+    #modal-title {
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+    }
+
+    .correct-text { color: var(--primary-dark); }
+    .incorrect-text { color: var(--secondary); }
+
+    #modal-exp {
+      font-size: 1rem;
+      line-height: 1.6;
+      background: #fdf6e3;
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .action-btn {
+      background-color: var(--accent);
+      color: var(--text);
+      border: none;
+      padding: 16px 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #e5c639;
+      width: 100%;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .action-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 0 0 #e5c639;
+    }
+
+    .revenge-btn {
+      background-color: var(--secondary);
+      color: var(--white);
+      box-shadow: 0 6px 0 var(--secondary-dark);
+      margin-bottom: 15px;
+    }
+
+    .revenge-btn:active {
+      box-shadow: 0 0 0 var(--secondary-dark);
+    }
+
+    .normal-btn {
+      background-color: var(--light-gray);
+      color: var(--text);
+      box-shadow: 0 6px 0 #c0c0c0;
+    }
+    
+    .normal-btn:active {
+      box-shadow: 0 0 0 #c0c0c0;
+    }
+
+    /* Result Screen */
+    #result-screen {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    #final-score {
+      font-size: 3.5rem;
+      color: var(--primary-dark);
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    #score-message {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <header>中1英語 総復習クイズ</header>
+
+    <!-- クイズ画面 -->
+    <div id="quiz-screen" class="container">
+      <div style="text-align: center;">
+        <div id="progress"></div>
+      </div>
+      <div id="question-text"></div>
+      <div id="choices-container"></div>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="result-screen" class="container hidden">
+      <h2>最終スコア</h2>
+      <div id="final-score"></div>
+      <div id="score-message"></div>
+      <button id="btn-revenge" class="action-btn revenge-btn hidden" onclick="startRevenge()">🔥 間違えた問題をリベンジ</button>
+      <button class="action-btn normal-btn" onclick="startNormal()">最初からやり直す</button>
+    </div>
+  </div>
+
+  <!-- 解説モーダル -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-content">
+      <h2 id="modal-title"></h2>
+      <div id="modal-exp"></div>
+      <button class="action-btn" onclick="nextQuestion()">次の問題へ</button>
+    </div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      { q: "They sometimes help ( &nbsp;&nbsp; ).<br><small>（彼らはときどきわたしたちを手伝います）</small>", options: ["we", "our", "us"], ans: "us", exp: "動詞（help）の後ろは「私たちを（目的格）」になるため us が正解です。" },
+      { q: "My brother knows ( &nbsp;&nbsp; ) well.<br><small>（わたしの兄はあなたたちをよく知っています）</small>", options: ["you", "your", "yours"], ans: "you", exp: "動詞（knows）の後ろには「あなたたちを（目的格）」が入るため you が正解です。" },
+      { q: "I know him. He knows ( &nbsp;&nbsp; ), too.<br><small>（私は彼を知っています。彼も私を知っています）</small>", options: ["you", "me", "my"], ans: "me", exp: "「私➔彼」「彼➔私」のキャッチボールの文脈です。動詞の後ろなので「私を（me）」が入ります。" },
+      { q: "We clean ( &nbsp;&nbsp; ) room.<br><small>（わたしたちは自分たちの部屋を掃除します）</small>", options: ["my", "our", "us"], ans: "our", exp: "主語が「私たちは（We）」なので、部屋も「私たちの（our）」部屋になります。" },
+      { q: "I have a bike. ( &nbsp;&nbsp; ) color is red.<br><small>（私は自転車を持っています。その色は赤です）</small>", options: ["It's", "Its", "It"], ans: "Its", exp: "「それの」という所有格はアポストロフィ（'）なしの Its を使います。It'sは It is の略です。" },
+      { q: "We ( &nbsp;&nbsp; ) a song at the concert.<br><small>（わたしたちはコンサートで歌を歌います）</small>", options: ["are", "sing", "singing"], ans: "sing", exp: "「歌う」という動作なので一般動詞（sing）を使います。areだと「私たちは歌です」になってしまいます。" },
+      { q: "You and Yuki are good tennis ( &nbsp;&nbsp; ).<br><small>（あなたと由紀は、良いテニス選手です）</small>", options: ["player", "players", "playing"], ans: "players", exp: "主語が「You and Yuki（2人）」と複数になったら、後ろの名詞も道連れで -s をつけます。" },
+      { q: "彼女は誰ですか。➔<br><small>（主語を複数形に変えた正しい英文は？）</small>", options: ["Who are those?", "Who are they?", "Who they are?"], ans: "Who are they?", exp: "she（彼女は）の複数形は they（彼女らは）です。主語が複数になるのでbe動詞も are になります。" },
+      { q: "What ( &nbsp;&nbsp; ) your father doing now?<br><small>（あなたのお父さんは今、何をしていますか）</small>", options: ["does", "is", "are"], ans: "is", exp: "現在進行形は be動詞＋ing のセット。ingの文に does は絶対に混ぜません。" },
+      { q: "Whose car ( &nbsp;&nbsp; ) Jim driving now?<br><small>（ジムは今、だれの車を運転していますか）</small>", options: ["does", "is", "are"], ans: "is", exp: "これも「今〜している」現在進行形なので be動詞（is）を使います。" },
+      { q: "Are you helping your father?<br><small>（あなたはお父さんを手伝っていますか）</small>", options: ["Yes, you are.", "Yes, I am.", "Yes, I do."], ans: "Yes, I am.", exp: "「あなたは？」と聞かれたら「私は」で返します。Are で聞かれたら be動詞（I am）で返します。" },
+      { q: "Can Mary speak French?<br><small>（メアリーはフランス語を話せますか）</small>", options: ["No, she doesn't.", "No, she isn't.", "No, she can't."], ans: "No, she can't.", exp: "Can で聞かれたら必ず can（can't）で打ち返します。" },
+      { q: "Who is making lunch? ―― Yuki and Kenta ( &nbsp;&nbsp; ).<br><small>（誰が昼食を作っていますか）</small>", options: ["are", "do", "is"], ans: "are", exp: "Who is〜? とbe動詞で聞かれたらbe動詞で返します。ユキとケンタは2人なので are になります。" },
+      { q: "What are those? ―― ( &nbsp;&nbsp; ) are apples.<br><small>（あれらは何ですか）</small>", options: ["Those", "They", "It"], ans: "They", exp: "These/Those で聞かれたら、モノであっても必ず They（それら） に持ち替えて答えます。" },
+      { q: "( &nbsp;&nbsp; ) is your mother's birthday? ―― It's November 30.", options: ["When", "What time", "Where"], ans: "When", exp: "11月30日と「日付」を答えているので、What time（何時）ではなく When（いつ）を使います。" },
+      { q: "I read books ( &nbsp;&nbsp; ) Sundays.<br><small>（私は日曜日に本を読みます）</small>", options: ["at", "on", "in"], ans: "on", exp: "曜日はカレンダーの上にポンと乗るイメージなので on を使います。" },
+      { q: "I watch TV ( &nbsp;&nbsp; ) the evening.<br><small>（私は夕方にテレビを見ます）</small>", options: ["at", "on", "in"], ans: "in", exp: "午前・午後や季節など、広い箱の中に入るイメージの時は in を使います。" },
+      { q: "I get home ( &nbsp;&nbsp; ) about five o'clock.<br><small>（私は5時ごろ帰宅します）</small>", options: ["at", "on", "in"], ans: "at", exp: "時計の針がピタッと指す「点」の時刻には at を使います。" },
+      { q: "この腕時計は古くありません。➔<br><small>（正しい英語は？）</small>", options: ["This isn't old watch.", "This watch isn't old.", "Watch this isn't old."], ans: "This watch isn't old.", exp: "Thisは名詞とセットにして「This watch（この腕時計）」で主語にすることができます。" },
+      { q: "I have two ( &nbsp;&nbsp; ) on the table.<br><small>（私はテーブルの上にナイフを2本持っています）</small>", options: ["knifes", "knives", "knife"], ans: "knives", exp: "f や fe で終わる単語の複数形は、f を v に変えて -es をつけます（knife ➔ knives）。" }
+    ];
+
+    let currentList = [];
+    let wrongList = [];
+    let currentIndex = 0;
+    let score = 0;
+    let isRevengeMode = false;
+
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const progressEl = document.getElementById('progress');
+    const questionTextEl = document.getElementById('question-text');
+    const choicesContainer = document.getElementById('choices-container');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalExp = document.getElementById('modal-exp');
+    const finalScoreEl = document.getElementById('final-score');
+    const scoreMessageEl = document.getElementById('score-message');
+    const btnRevenge = document.getElementById('btn-revenge');
+
+    // 配列をランダムにシャッフルする関数
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startNormal() {
+      currentList = [...allQuestions];
+      isRevengeMode = false;
+      initGame();
+    }
+
+    function startRevenge() {
+      currentList = [...wrongList];
+      isRevengeMode = true;
+      initGame();
+    }
+
+    function initGame() {
+      wrongList = [];
+      currentIndex = 0;
+      score = 0;
+      quizScreen.classList.remove('hidden');
+      resultScreen.classList.add('hidden');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = currentList[currentIndex];
+      const badge = isRevengeMode ? `<span class="revenge-badge">リベンジ</span>` : '';
+      progressEl.innerHTML = `${badge} ${currentIndex + 1} 問 / 全 ${currentList.length} 問`;
+      
+      questionTextEl.innerHTML = q.q;
+      choicesContainer.innerHTML = '';
+
+      // 選択肢をシャッフルして表示
+      const shuffledOptions = shuffleArray(q.options);
+      
+      shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt);
+        choicesContainer.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      const q = currentList[currentIndex];
+      
+      if (selected === q.ans) {
+        score++;
+        modalTitle.innerText = "⭕ 正解！";
+        modalTitle.className = "correct-text";
+      } else {
+        wrongList.push(q);
+        modalTitle.innerText = "❌ ざんねん";
+        modalTitle.className = "incorrect-text";
+      }
+
+      modalExp.innerHTML = `<strong>正解：${q.ans}</strong><br><br>${q.exp}`;
+      modal.classList.add('active');
+    }
+
+    function nextQuestion() {
+      modal.classList.remove('active');
+      currentIndex++;
+
+      if (currentIndex < currentList.length) {
+        setTimeout(renderQuestion, 250);
+      } else {
+        setTimeout(showResult, 250);
+      }
+    }
+
+    function showResult() {
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+
+      finalScoreEl.innerText = `${score} / ${currentList.length}`;
+
+      if (wrongList.length > 0) {
+        scoreMessageEl.innerText = "間違えた問題があります。\n解説を思い出してリベンジしよう！";
+        btnRevenge.classList.remove('hidden');
+      } else {
+        scoreMessageEl.innerText = isRevengeMode 
+          ? "リベンジ達成！\n苦手をしっかり克服できました✨" 
+          : "全問正解パーフェクト！\n基礎がバッチリ身についています✨";
+        btnRevenge.classList.add('hidden');
+      }
+    }
+
+    // アプリ初期化
+    startNormal();
+  </script>
+</body>
+</html>
+```<FollowUp label="問題の順番自体もシャッフルしますか？" query="選択肢だけでなく、出題される問題の順番自体も毎回ランダムにシャッフルされるように変更してください。"/>
